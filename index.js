@@ -282,6 +282,7 @@ Airtouch.prototype.updateACAccessory = function(accessory, status) {
 	thermostat.setCharacteristic(CustomCharacteristic.SpillStatus, accessory.context.spillStatus);
 
 	accessory.context.timerStatus = status.ac_timer;
+	// TODO warning generated from undefined value here
 	thermostat.setCharacteristic(CustomCharacteristic.TimerStatus, accessory.context.timerStatus);
 
 	accessory.updateReachability(true);
@@ -315,6 +316,7 @@ Airtouch.prototype.setupZoneAccessory = function(accessory) {
 
 	zone.isPrimaryService = true;
 
+/*
 	let damper = accessory.getService(Service.Window);
 	if (damper === undefined)
 		damper = accessory.addService(Service.Window, accessory.displayName + " Damper");
@@ -341,6 +343,7 @@ Airtouch.prototype.setupZoneAccessory = function(accessory) {
 		.on("get", function(cb){ return cb(null, this.displayName + " Damper"); }.bind(accessory));
 
 	zone.addLinkedService(damper);
+*/
 
 	let sensor = accessory.getService(Service.TemperatureSensor);
 	if (sensor === undefined)
@@ -365,7 +368,7 @@ Airtouch.prototype.setupZoneAccessory = function(accessory) {
 // update Zone accessory data
 Airtouch.prototype.updateZoneAccessory = function(accessory, status) {
 	let zone = accessory.getService(Service.Switch);
-	let damper = accessory.getService(Service.Window);
+	// let damper = accessory.getService(Service.Window);
 	let sensor = accessory.getService(Service.TemperatureSensor);
 
 	accessory.context.active = status.group_power_state % 2;
@@ -373,11 +376,13 @@ Airtouch.prototype.updateZoneAccessory = function(accessory, status) {
 
 	accessory.context.controlType = status.group_control_type;
 	// when using temperature control, set the damper as obstructed
+/*
 	damper.setCharacteristic(Characteristic.ObstructionDetected, accessory.context.controlType);
 
 	accessory.context.damperPosition = status.group_damper_position;
 	damper.setCharacteristic(Characteristic.CurrentPosition, accessory.context.damperPosition);
 	damper.setCharacteristic(Characteristic.TargetPosition, accessory.context.damperPosition);
+*/
 
 	if (status.group_has_sensor) {
 		if (sensor.isHiddenService)
@@ -397,7 +402,7 @@ Airtouch.prototype.updateZoneAccessory = function(accessory, status) {
 		});
 
 		// update thermostat accessory
-		thermo_name = accessory.displayName + " Thermostat";
+		let thermo_name = accessory.displayName + " Thermostat";
 		this.log("Updating [" + thermo_name + "]");
 		// check if accessory exists
 		if (!(thermo_name in this.thermostats)) {

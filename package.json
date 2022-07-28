@@ -1,5 +1,5 @@
 {
-  "name": "homebridge-airtouch4-platform",
+  "name": "homebridge-airtouch4-platform-metaeaux",
   "version": "0.1.4",
   "description": "Plugin for homebridge to connect to Airtouch4 AC controller",
   "main": "index.js",
@@ -8,11 +8,11 @@
     "airtouch",
     "air conditioner"
   ],
-  "author": "Marian Mihailescu <mihailescu2m@gmail.com>",
+  "author": "Harley Mellifont <harley@glue.io>",
   "license": "ISC",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mihailescu2m/homebridge-airtouch4-platform.git"
+    "url": "git+https://github.com/metaeaux/homebridge-airtouch4-platform-metaeaux.git"
   },
   "engines": {
     "homebridge": ">=0.2.0",
@@ -23,9 +23,9 @@
     "fakegato-history": "^0.5.6"
   },
   "bugs": {
-    "url": "https://github.com/mihailescu2m/homebridge-airtouch4-platform/issues"
+    "url": "https://github.com/metaeaux/homebridge-airtouch4-platform-metaeaux/issues"
   },
-  "homepage": "https://github.com/mihailescu2m/homebridge-airtouch4-platform#readme",
+  "homepage": "https://github.com/metaeaux/homebridge-airtouch4-platform-metaeaux#readme",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   }

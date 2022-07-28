@@ -1,5 +1,5 @@
 const MAGIC = require("./magic");
-var net = require("net");
+const net = require("net");
 
 //
 // Airtouch API
@@ -9,18 +9,18 @@ var net = require("net");
 //
 function AirtouchAPI(log) {
 	this.log = log;
-};
+}
 
 // messages have the data checksummed using modbus crc16
 // crc16 implementation from https://github.com/yuanxu2017/modbus-crc16
 function crc16(buffer) {
-	var crc = 0xFFFF;
-	var odd;
+	let crc = 0xFFFF;
+	let odd;
 
-	for (var i = 0; i < buffer.length; i++) {
+	for (let i = 0; i < buffer.length; i++) {
 		crc = crc ^ buffer[i];
 
-		for (var j = 0; j < 8; j++) {
+		for (let j = 0; j < 8; j++) {
 			odd = crc & 0x0001;
 			crc = crc >> 1;
 			if (odd) {
@@ -29,12 +29,12 @@ function crc16(buffer) {
 		}
 	}
 	return crc;
-};
+}
 
 // check if value is undefined, and replace it with a default value
 function isNull(val, nullVal) {
 	return val === undefined ? nullVal : val;
-};
+}
 
 // send message to the Airtouch Touchpad Controller
 AirtouchAPI.prototype.send = function(type, data) {
@@ -283,9 +283,9 @@ AirtouchAPI.prototype.connect = function(address) {
 		let header = this.device.read(6);
 		if (!header)
 			return;
-		if (header[0] != MAGIC.HEADER_BYTES[0]
-			|| header[1] != MAGIC.HEADER_BYTES[1]
-			|| header[3] != MAGIC.ADDRESS_BYTES[0]) {
+		if (header[0] !== MAGIC.HEADER_BYTES[0]
+			|| header[1] !== MAGIC.HEADER_BYTES[1]
+			|| header[3] !== MAGIC.ADDRESS_BYTES[0]) {
 			this.log("API | WARNING: invalid header " + header.toString("hex"));
 		}
 		let msgid = header[4];
