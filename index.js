@@ -127,7 +127,7 @@ Airtouch.prototype.onACStatusNotification = function(ac_status) {
 // callback for Group messages received from Airtouch Touchpad Controller
 Airtouch.prototype.onGroupsStatusNotification = function(groups_status) {
 	groups_status.forEach(zone_status => {
-		zone_name = "Zone " + zone_status.group_number;
+		let zone_name = "Zone " + zone_status.group_number;
 		this.log("Received status update for [" + zone_name + "]: " + JSON.stringify(zone_status));
 		// check if accessory exists
 		if (!(zone_name in this.zones)) {
@@ -281,8 +281,7 @@ Airtouch.prototype.updateACAccessory = function(accessory, status) {
 	accessory.context.spillStatus = status.ac_spill;
 	thermostat.setCharacteristic(CustomCharacteristic.SpillStatus, accessory.context.spillStatus);
 
-	accessory.context.timerStatus = status.ac_timer;
-	// TODO warning generated from undefined value here
+	accessory.context.timerStatus = status.ac_timer_set;
 	thermostat.setCharacteristic(CustomCharacteristic.TimerStatus, accessory.context.timerStatus);
 
 	accessory.updateReachability(true);

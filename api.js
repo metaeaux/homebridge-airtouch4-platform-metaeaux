@@ -74,6 +74,7 @@ AirtouchAPI.prototype.encode_ac_control = function(unit) {
 
 // send command to change AC mode (OFF/HEATING/COOLING/AUTO)
 AirtouchAPI.prototype.acSetCurrentHeatingCoolingState = function(unit_number, state) {
+	let target;
 	switch (state) {
 		case 0: // OFF
 			target = {
@@ -109,7 +110,7 @@ AirtouchAPI.prototype.acSetCurrentHeatingCoolingState = function(unit_number, st
 
 // send command to change AC target temperature
 AirtouchAPI.prototype.acSetTargetTemperature = function(unit_number, temp) {
-	target = {
+	let target = {
 		ac_unit_number: unit_number,
 		ac_target_value: temp,
 	};
@@ -120,7 +121,7 @@ AirtouchAPI.prototype.acSetTargetTemperature = function(unit_number, temp) {
 
 // send command to change AC fan speed 
 AirtouchAPI.prototype.acSetFanSpeed = function(unit_number, speed) {
-	target = {
+	let target = {
 		ac_unit_number: unit_number,
 		ac_fan_speed: speed,
 	};
@@ -140,18 +141,18 @@ AirtouchAPI.prototype.GET_AC_STATUS = function() {
 
 // decode AC status information and send it to homebridge
 AirtouchAPI.prototype.decode_ac_status = function(data) {
-	ac_status = [];
+	let ac_status = [];
 	for (i = 0; i < data.length/8; i++) {
 		let unit = data.slice(i*8, i*8+8);
-		ac_power_state = (unit[0] & 0b11000000) >> 6;
-		ac_unit_number = unit[0] & 0b00111111;
-		ac_mode = (unit[1] & 0b11110000) >> 4;
-		ac_fan_speed = unit[1] & 0b00001111;
-		ac_spill = (unit[2] & 0b10000000) >> 7;
-		ac_timer = (unit[2] & 0b01000000) >> 6;
-		ac_target = (unit[2] & 0b00111111) * 1.0;
-		ac_temp = (((unit[4] << 3) + ((unit[5] & 0b11100000) >> 5)) - 500) / 10;
-		ac_error_code = (unit[6] << 8) + (unit[7]);
+		let ac_power_state = (unit[0] & 0b11000000) >> 6;
+		let ac_unit_number = unit[0] & 0b00111111;
+		let ac_mode = (unit[1] & 0b11110000) >> 4;
+		let ac_fan_speed = unit[1] & 0b00001111;
+		let ac_spill = (unit[2] & 0b10000000) >> 7;
+		let ac_timer = (unit[2] & 0b01000000) >> 6;
+		let ac_target = (unit[2] & 0b00111111) * 1.0;
+		let ac_temp = (((unit[4] << 3) + ((unit[5] & 0b11100000) >> 5)) - 500) / 10;
+		let ac_error_code = (unit[6] << 8) + (unit[7]);
 		ac_status.push({
 			ac_unit_number: ac_unit_number,
 			ac_power_state: ac_power_state,
@@ -180,7 +181,7 @@ AirtouchAPI.prototype.encode_group_control = function(group) {
 
 // send command to change zone power state (ON/OFF)
 AirtouchAPI.prototype.zoneSetActive = function(group_number, active) {
-	target = {
+	let target = {
 		group_number: group_number,
 		group_power_state: active ? MAGIC.GROUP_POWER_STATES.ON : MAGIC.GROUP_POWER_STATES.OFF,
 	};
@@ -191,7 +192,7 @@ AirtouchAPI.prototype.zoneSetActive = function(group_number, active) {
 
 // send command to set damper position
 AirtouchAPI.prototype.zoneSetDamperPosition = function(group_number, position) {
-	target = {
+	let target = {
 		group_number: group_number,
 		group_target_type: MAGIC.GROUP_TARGET_TYPES.DAMPER,
 		group_target: position,
@@ -203,7 +204,7 @@ AirtouchAPI.prototype.zoneSetDamperPosition = function(group_number, position) {
 
 // send command to set control type (0 = DAMPER, 1 = TEMPERATURE)
 AirtouchAPI.prototype.zoneSetControlType = function(group_number, type) {
-	target = {
+	let target = {
 		group_number: group_number,
 		group_control_type: MAGIC.GROUP_CONTROL_TYPES.DAMPER + type,
 	};
@@ -214,7 +215,7 @@ AirtouchAPI.prototype.zoneSetControlType = function(group_number, type) {
 
 // send command to set target temperature
 AirtouchAPI.prototype.zoneSetTargetTemperature = function(group_number, temp) {
-	target = {
+	let target = {
 		group_number: group_number,
 		group_target_type: MAGIC.GROUP_TARGET_TYPES.TEMPERATURE,
 		group_target: temp,
@@ -235,19 +236,19 @@ AirtouchAPI.prototype.GET_GROUP_STATUS = function() {
 
 // decode groups status information and send it to homebridge
 AirtouchAPI.prototype.decode_groups_status = function(data) {
-	groups_status = [];
+	let groups_status = [];
 	for (i = 0; i < data.length/6; i++) {
 		let group = data.slice(i*6, i*6+6);
-		group_power_state = (group[0] & 0b11000000) >> 6;
-		group_number = group[0] & 0b00111111;
-		group_control_type = (group[1] & 0b10000000) >> 7;
-		group_open_perc = group[1] & 0b01111111;
-		group_battery_low = (group[2] & 0b10000000) >> 7;
-		group_has_turbo = (group[2] & 0b01000000) >> 6;
-		group_target = (group[2] & 0b00111111) * 1.0;
-		group_has_sensor = (group[3] & 0b10000000) >> 7;
-		group_temp = (((group[4] << 3) + ((group[5] & 0b11100000) >> 5)) - 500) / 10;
-		group_has_spill = (group[5] & 0b00010000) >> 4;
+		let group_power_state = (group[0] & 0b11000000) >> 6;
+		let group_number = group[0] & 0b00111111;
+		let group_control_type = (group[1] & 0b10000000) >> 7;
+		let group_open_perc = group[1] & 0b01111111;
+		let group_battery_low = (group[2] & 0b10000000) >> 7;
+		let group_has_turbo = (group[2] & 0b01000000) >> 6;
+		let group_target = (group[2] & 0b00111111) * 1.0;
+		let group_has_sensor = (group[3] & 0b10000000) >> 7;
+		let group_temp = (((group[4] << 3) + ((group[5] & 0b11100000) >> 5)) - 500) / 10;
+		let group_has_spill = (group[5] & 0b00010000) >> 4;
 		groups_status.push({
 			group_number: group_number,
 			group_power_state: group_power_state,

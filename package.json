@@ -1,6 +1,6 @@
 {
   "name": "homebridge-airtouch4-platform-metaeaux",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Plugin for homebridge to connect to Airtouch4 AC controller",
   "main": "index.js",
   "keywords": [
