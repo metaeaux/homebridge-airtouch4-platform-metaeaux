@@ -158,7 +158,7 @@ Airtouch.prototype.setupACAccessory = function(accessory) {
 	accessory.getService(Service.AccessoryInformation)
 		.setCharacteristic(Characteristic.Manufacturer, accessory.context.manufacturer)
 		.setCharacteristic(Characteristic.Model, accessory.context.model)
-		.setCharacteristic(Characteristic.SerialNumber, accessory.context.serial.toString());
+		.setCharacteristic(Characteristic.SerialNumber, "AC" + accessory.context.serial.toString());
 
 	let thermostat = accessory.getService(Service.Thermostat);
 	if (thermostat === undefined)
@@ -298,7 +298,7 @@ Airtouch.prototype.setupZoneAccessory = function(accessory) {
 	accessory.getService(Service.AccessoryInformation)
 		.setCharacteristic(Characteristic.Manufacturer, accessory.context.manufacturer)
 		.setCharacteristic(Characteristic.Model, accessory.context.model)
-		.setCharacteristic(Characteristic.SerialNumber, accessory.context.serial.toString());
+		.setCharacteristic(Characteristic.SerialNumber, "Zone" + accessory.context.serial.toString());
 
 	let zone = accessory.getService(Service.Switch);
 	if (zone === undefined)
@@ -446,7 +446,7 @@ Airtouch.prototype.setupThermoAccessory = function(accessory) {
 	accessory.getService(Service.AccessoryInformation)
 		.setCharacteristic(Characteristic.Manufacturer, accessory.context.manufacturer)
 		.setCharacteristic(Characteristic.Model, accessory.context.model)
-		.setCharacteristic(Characteristic.SerialNumber, accessory.context.serial.toString());
+		.setCharacteristic(Characteristic.SerialNumber, "Thermostat" + accessory.context.serial.toString());
 
 	let thermo = accessory.getService(Service.Thermostat);
 	if (thermo === undefined)
