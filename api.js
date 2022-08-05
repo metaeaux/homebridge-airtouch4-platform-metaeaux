@@ -237,7 +237,7 @@ AirtouchAPI.prototype.GET_GROUP_STATUS = function() {
 // decode groups status information and send it to homebridge
 AirtouchAPI.prototype.decode_groups_status = function(data) {
 	let groups_status = [];
-	for (i = 0; i < data.length/6; i++) {
+	for (let i = 0; i < data.length/6; i++) {
 		let group = data.slice(i*6, i*6+6);
 		let group_power_state = (group[0] & 0b11000000) >> 6;
 		let group_number = group[0] & 0b00111111;
@@ -274,7 +274,8 @@ AirtouchAPI.prototype.connect = function(address) {
 		setTimeout(this.GET_AC_STATUS.bind(this), 0);
 		setTimeout(this.GET_GROUP_STATUS.bind(this), 2000);
 		// schedule group status every 4.75 minutes to get updates for FakeGato history service
-		setInterval(this.GET_GROUP_STATUS.bind(this), 285000);
+		setInterval(this.GET_AC_STATUS.bind(this), 10000);
+		setInterval(this.GET_GROUP_STATUS.bind(this), 10000);
 	});
 	this.device.on("close", () => {
 		this.log("API | Disconnected from Airtouch");
