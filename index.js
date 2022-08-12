@@ -371,7 +371,7 @@ Airtouch.prototype.updateZoneAccessory = function(accessory, status) {
 	let sensor = accessory.getService(Service.TemperatureSensor);
 
 	accessory.context.active = status.group_power_state % 2;
-	zone.setCharacteristic(Characteristic.Active, accessory.context.active);
+	zone.setCharacteristic(Characteristic.On, accessory.context.active);
 
 	accessory.context.controlType = status.group_control_type;
 	// when using temperature control, set the damper as obstructed
