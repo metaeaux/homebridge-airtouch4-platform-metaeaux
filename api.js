@@ -139,6 +139,15 @@ AirtouchAPI.prototype.GET_AC_STATUS = function() {
 	this.send(MAGIC.MSGTYPE_AC_STAT, data);
 };
 
+AirtouchAPI.prototype.requestStatus = function() {
+	const now = Date.now();
+	if (now - this.lastStatus > 3000) {
+		this.lastStatus = now;
+		this.GET_AC_STATUS();
+		this.GET_GROUP_STATUS();
+	}
+};
+
 // decode AC status information and send it to homebridge
 AirtouchAPI.prototype.decode_ac_status = function(data) {
 	let ac_status = [];

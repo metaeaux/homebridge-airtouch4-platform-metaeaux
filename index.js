@@ -166,16 +166,16 @@ Airtouch.prototype.setupACAccessory = function(accessory) {
 
 	thermostat
         .getCharacteristic(Characteristic.CurrentHeatingCoolingState)
-		.on("get", function(cb){ return cb(null, this.context.currentHeatingCoolingState); }.bind(accessory));
+		.on("get", function(cb){ this.api.requestStatus(); return cb(null, this.context.currentHeatingCoolingState); }.bind(accessory));
 
 	thermostat
         .getCharacteristic(Characteristic.TargetHeatingCoolingState)
-		.on("get", function(cb){ return cb(null, this.context.targetHeatingCoolingState); }.bind(accessory))
+		.on("get", function(cb){ this.api.requestStatus(); return cb(null, this.context.targetHeatingCoolingState); }.bind(accessory))
         .on("set", this.acSetTargetHeatingCoolingState.bind(accessory));
 
 	thermostat
 		.getCharacteristic(Characteristic.CurrentTemperature)
-		.on("get", function(cb){ return cb(null, this.context.currentTemperature); }.bind(accessory));
+		.on("get", function(cb){ this.api.requestStatus(); return cb(null, this.context.currentTemperature); }.bind(accessory));
 
 	thermostat
         .getCharacteristic(Characteristic.TargetTemperature)
@@ -183,7 +183,7 @@ Airtouch.prototype.setupACAccessory = function(accessory) {
 			minStep: 1.0,
 			minValue: 14.0,
 			maxValue: 29.0})
-		.on("get", function(cb){ return cb(null, this.context.targetTemperature); }.bind(accessory))
+		.on("get", function(cb){ this.api.requestStatus(); return cb(null, this.context.targetTemperature); }.bind(accessory))
 		.on("set", this.acSetTargetTemperature.bind(accessory));
 
 	accessory.context.temperatureDisplayUnits = 0; // defaults to Celsius
@@ -306,7 +306,7 @@ Airtouch.prototype.setupZoneAccessory = function(accessory) {
 
 	zone
 		.getCharacteristic(Characteristic.On)
-		.on("get", function(cb){ return cb(null, this.context.active); }.bind(accessory))
+		.on("get", function(cb){ this.api.requestStatus(); return cb(null, this.context.active); }.bind(accessory))
 		.on("set", this.zoneSetActive.bind(accessory));
 
 	zone
@@ -350,7 +350,7 @@ Airtouch.prototype.setupZoneAccessory = function(accessory) {
 
 	sensor
 		.getCharacteristic(Characteristic.CurrentTemperature)
-		.on("get", function(cb){ return cb(null, this.context.currentTemperature); }.bind(accessory));
+		.on("get", function(cb){ this.api.requestStatus(); return cb(null, this.context.currentTemperature); }.bind(accessory));
 
 	sensor
 		.getCharacteristic(Characteristic.StatusLowBattery)
