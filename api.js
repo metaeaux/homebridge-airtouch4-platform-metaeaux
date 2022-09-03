@@ -10,7 +10,9 @@ const net = require("net");
 function AirtouchAPI(log) {
 	this.log = log;
 	this.acQueue = [];
+	this.acTimeout = 0;
 	this.groupQueue = [];
+	this.groupTimeout = 0;
 }
 
 // messages have the data checksummed using modbus crc16
@@ -152,12 +154,14 @@ AirtouchAPI.prototype.requestStatus = function() {
 
 AirtouchAPI.prototype.requestACStatus = function(cb) {
 	this.acQueue.push(cb);
-	this.GET_AC_STATUS();
+	clearTimeout(this.acTimeout);
+	this.acTimeout = setTimeout(() => this.GET_AC_STATUS(), 200);
 };
 
 AirtouchAPI.prototype.requestGroupStatus = function(cb) {
 	this.groupQueue.push(cb);
-	this.GET_GROUP_STATUS();
+	clearTimeout(this.groupTimeout)
+	this.groupTimeout = setTimeout(() => this.GET_GROUP_STATUS(), 200);
 };
 
 // decode AC status information and send it to homebridge
