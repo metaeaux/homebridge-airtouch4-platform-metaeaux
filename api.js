@@ -9,6 +9,8 @@ const net = require("net");
 //
 function AirtouchAPI(log) {
 	this.log = log;
+	this.acQueue = [];
+	this.groupQueue = [];
 }
 
 // messages have the data checksummed using modbus crc16
@@ -148,6 +150,16 @@ AirtouchAPI.prototype.requestStatus = function() {
 	}
 };
 
+AirtouchAPI.prototype.requestACStatus = function(cb) {
+	this.acQueue.push(cb);
+	this.GET_AC_STATUS();
+};
+
+AirtouchAPI.prototype.requestGroupStatus = function(cb) {
+	this.groupQueue.push(cb);
+	this.GET_GROUP_STATUS();
+};
+
 // decode AC status information and send it to homebridge
 AirtouchAPI.prototype.decode_ac_status = function(data) {
 	let ac_status = [];
@@ -175,6 +187,10 @@ AirtouchAPI.prototype.decode_ac_status = function(data) {
 		});
 	}
 	this.emit("ac_status", ac_status);
+	if (this.acQueue.length) {
+		const cb = this.acQueue.shift();
+		cb && cb();
+	}
 };
 
 // encode a message for AC command
@@ -272,6 +288,10 @@ AirtouchAPI.prototype.decode_groups_status = function(data) {
 		});
 	}
 	this.emit("groups_status", groups_status);
+	if (this.groupQueue.length) {
+		const cb = this.groupQueue.shift();
+		cb && cb();
+	}
 };
 
 // connect to Airtouch Touchpad Controller socket on tcp port 9004
