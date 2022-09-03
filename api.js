@@ -187,7 +187,7 @@ AirtouchAPI.prototype.decode_ac_status = function(data) {
 		});
 	}
 	this.emit("ac_status", ac_status);
-	if (this.acQueue.length) {
+	while (this.acQueue.length) {
 		const cb = this.acQueue.shift();
 		cb && cb();
 	}
@@ -288,7 +288,7 @@ AirtouchAPI.prototype.decode_groups_status = function(data) {
 		});
 	}
 	this.emit("groups_status", groups_status);
-	if (this.groupQueue.length) {
+	while (this.groupQueue.length) {
 		const cb = this.groupQueue.shift();
 		cb && cb();
 	}
