@@ -153,15 +153,33 @@ AirtouchAPI.prototype.requestStatus = function() {
 };
 
 AirtouchAPI.prototype.requestACStatus = function(cb) {
-	this.acQueue.push(cb);
 	clearTimeout(this.acTimeout);
-	this.acTimeout = setTimeout(() => this.GET_AC_STATUS(), 200);
+	this.acTimeout = setTimeout(() => {
+		this.GET_AC_STATUS();
+		this.acQueue.push(cb);
+
+		// Retry
+		setTimeout(() => {
+			if(this.acQueue.includes(cb)) {
+				this.GET_AC_STATUS();
+			}
+		}, 300);
+	}, 200);
 };
 
 AirtouchAPI.prototype.requestGroupStatus = function(cb) {
-	this.groupQueue.push(cb);
 	clearTimeout(this.groupTimeout)
-	this.groupTimeout = setTimeout(() => this.GET_GROUP_STATUS(), 200);
+	this.groupTimeout = setTimeout(() => {
+		this.GET_GROUP_STATUS();
+		this.groupQueue.push(cb);
+
+		// Retry
+		setTimeout(() => {
+			if(this.groupQueue.includes(cb)) {
+				this.GET_GROUP_STATUS();
+			}
+		}, 300);
+	}, 200);
 };
 
 // decode AC status information and send it to homebridge
