@@ -153,32 +153,24 @@ AirtouchAPI.prototype.requestStatus = function() {
 };
 
 AirtouchAPI.prototype.requestACStatus = function(cb) {
+	this.log("hm: requestACStatus");
 	clearTimeout(this.acTimeout);
 	this.acTimeout = setTimeout(() => {
+		this.log("hm: requestACStatus: push");
 		this.acQueue.push(cb);
+		this.log("hm: requestACStatus: GET_AC_STATUS");
 		this.GET_AC_STATUS();
-
-		// Retry
-		setTimeout(() => {
-			if(this.acQueue.includes(cb)) {
-				this.GET_AC_STATUS();
-			}
-		}, 300);
 	}, 200);
 };
 
 AirtouchAPI.prototype.requestGroupStatus = function(cb) {
+	this.log("hm: requestGroupStatus");
 	clearTimeout(this.groupTimeout)
 	this.groupTimeout = setTimeout(() => {
+		this.log("hm: requestGroupStatus: push");
 		this.groupQueue.push(cb);
+		this.log("hm: requestGroupStatus: GET_GROUP_STATUS");
 		this.GET_GROUP_STATUS();
-
-		// Retry
-		setTimeout(() => {
-			if(this.groupQueue.includes(cb)) {
-				this.GET_GROUP_STATUS();
-			}
-		}, 300);
 	}, 200);
 };
 
@@ -210,6 +202,7 @@ AirtouchAPI.prototype.decode_ac_status = function(data) {
 	}
 	this.emit("ac_status", ac_status);
 	while (this.acQueue.length) {
+		this.log("hm: acQueue: emit");
 		const cb = this.acQueue.shift();
 		cb && cb();
 	}
@@ -311,6 +304,7 @@ AirtouchAPI.prototype.decode_groups_status = function(data) {
 	}
 	this.emit("groups_status", groups_status);
 	while (this.groupQueue.length) {
+		this.log("hm: groupQueue: emit");
 		const cb = this.groupQueue.shift();
 		cb && cb();
 	}
