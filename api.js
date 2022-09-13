@@ -210,7 +210,7 @@ AirtouchAPI.prototype.decode_ac_status = function(data, id) {
 	this.emit("ac_status", ac_status);
 	for (let i = 0; i < this.acQueue.length; i++) {
 		const cb = this.acQueue[i];
-		if (cb.id === id) {
+		if (cb.id <= id) {
 			cb.cb && cb.cb();
 			this.log("hm: decode_ac_status: emit cb: " + id);
 			this.acQueue[i] = undefined;
@@ -316,7 +316,7 @@ AirtouchAPI.prototype.decode_groups_status = function(data, id) {
 	this.emit("groups_status", groups_status);
 	for (let i = 0; i < this.groupQueue.length; i++) {
 		const cb = this.groupQueue[i];
-		if (cb.id === id) {
+		if (cb.id <= id) {
 			cb.cb && cb.cb();
 			this.log("hm: decode_groups_status: emit cb: " + id);
 			this.groupQueue[i] = undefined;
