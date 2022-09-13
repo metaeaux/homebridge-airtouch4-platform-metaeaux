@@ -10,9 +10,11 @@ const net = require("net");
 function AirtouchAPI(log) {
 	this.log = log;
 	this.acQueue = [];
+	this.nextAcId = 0;
 	this.acTimeout = 0;
 	this.groupQueue = [];
 	this.groupTimeout = 0;
+	this.nextGroupId = 128;
 }
 
 // messages have the data checksummed using modbus crc16
@@ -41,8 +43,8 @@ function isNull(val, nullVal) {
 }
 
 // send message to the Airtouch Touchpad Controller
-AirtouchAPI.prototype.send = function(type, data) {
-	let id = Math.floor(Math.random() * Math.floor(255)) + 1;
+AirtouchAPI.prototype.send = function(type, data, id) {
+	id = id || Math.floor(Math.random() * Math.floor(255)) + 1;
 	this.log("API | Sending message " + id + " with type " + type.toString(16) + " containing:");
 	this.log(data);
 	// generate a random message id
@@ -135,12 +137,12 @@ AirtouchAPI.prototype.acSetFanSpeed = function(unit_number, speed) {
 };
 
 // send command to get AC status
-AirtouchAPI.prototype.GET_AC_STATUS = function() {
+AirtouchAPI.prototype.GET_AC_STATUS = function(id) {
 	// due to a bug, cannot send empty data
 	// so we send one byte of data
 	let data = Buffer.alloc(1);
 	data.writeUInt8(1, 0);
-	this.send(MAGIC.MSGTYPE_AC_STAT, data);
+	this.send(MAGIC.MSGTYPE_AC_STAT, data, id);
 };
 
 AirtouchAPI.prototype.requestStatus = function() {
@@ -155,28 +157,32 @@ AirtouchAPI.prototype.requestStatus = function() {
 AirtouchAPI.prototype.requestACStatus = function(cb) {
 	this.log("hm: requestACStatus");
 	this.log("hm: requestACStatus: push");
-	this.acQueue.push(cb);
+	const id = this.nextAcId;
+	this.acQueue.push({cb, id});
 	clearTimeout(this.acTimeout);
 	this.acTimeout = setTimeout(() => {
 		this.log("hm: requestACStatus: push");
-		this.log("hm: requestACStatus: GET_AC_STATUS");
-		this.GET_AC_STATUS();
+		this.log("hm: requestACStatus: GET_AC_STATUS: " + id);
+		this.GET_AC_STATUS(id);
+		this.nextAcId = this.nextAcId++ % 128;
 	}, 200);
 };
 
 AirtouchAPI.prototype.requestGroupStatus = function(cb) {
 	this.log("hm: requestGroupStatus");
 	this.log("hm: requestGroupStatus: push");
-	this.groupQueue.push(cb);
+	const id = this.nextGroupId;
+	this.groupQueue.push({cb, id});
 	clearTimeout(this.groupTimeout)
 	this.groupTimeout = setTimeout(() => {
-		this.log("hm: requestGroupStatus: GET_GROUP_STATUS");
-		this.GET_GROUP_STATUS();
+		this.log("hm: requestGroupStatus: GET_GROUP_STATUS: " + id);
+		this.GET_GROUP_STATUS(id);
+		this.nextGroupId = (this.nextGroupId++ % 128) + 128;
 	}, 200);
 };
 
 // decode AC status information and send it to homebridge
-AirtouchAPI.prototype.decode_ac_status = function(data) {
+AirtouchAPI.prototype.decode_ac_status = function(data, id) {
 	let ac_status = [];
 	for (i = 0; i < data.length/8; i++) {
 		let unit = data.slice(i*8, i*8+8);
@@ -202,11 +208,13 @@ AirtouchAPI.prototype.decode_ac_status = function(data) {
 		});
 	}
 	this.emit("ac_status", ac_status);
-	while (this.acQueue.length) {
-		this.log("hm: acQueue: emit");
-		const cb = this.acQueue.shift();
-		cb && cb();
-	}
+	this.acQueue.forEach((cb) => {
+		if (cb.id === id) {
+			cb.cb && cb.cb();
+			this.log("hm: decode_ac_status: emit cb: " + id);
+			this.acQueue.splice(this.acQueue.indexOf(cb), 1);
+		}
+	});
 };
 
 // encode a message for AC command
@@ -267,16 +275,16 @@ AirtouchAPI.prototype.zoneSetTargetTemperature = function(group_number, temp) {
 };
 
 // send command to get group status
-AirtouchAPI.prototype.GET_GROUP_STATUS = function() {
+AirtouchAPI.prototype.GET_GROUP_STATUS = function(id) {
 	// due to a bug, cannot send empty data
 	// so we send one byte of data
 	let data = Buffer.alloc(1);
 	data.writeUInt8(1, 0);
-	this.send(MAGIC.MSGTYPE_GRP_STAT, data);
+	this.send(MAGIC.MSGTYPE_GRP_STAT, data, id);
 };
 
 // decode groups status information and send it to homebridge
-AirtouchAPI.prototype.decode_groups_status = function(data) {
+AirtouchAPI.prototype.decode_groups_status = function(data, id) {
 	let groups_status = [];
 	for (let i = 0; i < data.length/6; i++) {
 		let group = data.slice(i*6, i*6+6);
@@ -304,11 +312,13 @@ AirtouchAPI.prototype.decode_groups_status = function(data) {
 		});
 	}
 	this.emit("groups_status", groups_status);
-	while (this.groupQueue.length) {
-		this.log("hm: groupQueue: emit");
-		const cb = this.groupQueue.shift();
-		cb && cb();
-	}
+	this.groupQueue.forEach((cb) => {
+		if (cb.id === id) {
+			cb.cb && cb.cb();
+			this.log("hm: decode_groups_status: emit cb: " + id);
+			this.groupQueue.splice(this.groupQueue.indexOf(cb), 1);
+		}
+	});
 };
 
 // connect to Airtouch Touchpad Controller socket on tcp port 9004
@@ -348,11 +358,11 @@ AirtouchAPI.prototype.connect = function(address) {
 		switch (msgtype) {
 			case MAGIC.MSGTYPE_GRP_STAT:
 				// decode groups status info
-				this.decode_groups_status(data);
+				this.decode_groups_status(data, msgid);
 				break;
 			case MAGIC.MSGTYPE_AC_STAT:
 				// decode ac status info
-				this.decode_ac_status(data);
+				this.decode_ac_status(data, msgid);
 				break;
 		}
 	});
