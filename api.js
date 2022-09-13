@@ -154,10 +154,11 @@ AirtouchAPI.prototype.requestStatus = function() {
 
 AirtouchAPI.prototype.requestACStatus = function(cb) {
 	this.log("hm: requestACStatus");
+	this.log("hm: requestACStatus: push");
+	this.acQueue.push(cb);
 	clearTimeout(this.acTimeout);
 	this.acTimeout = setTimeout(() => {
 		this.log("hm: requestACStatus: push");
-		this.acQueue.push(cb);
 		this.log("hm: requestACStatus: GET_AC_STATUS");
 		this.GET_AC_STATUS();
 	}, 200);
@@ -165,10 +166,10 @@ AirtouchAPI.prototype.requestACStatus = function(cb) {
 
 AirtouchAPI.prototype.requestGroupStatus = function(cb) {
 	this.log("hm: requestGroupStatus");
+	this.log("hm: requestGroupStatus: push");
+	this.groupQueue.push(cb);
 	clearTimeout(this.groupTimeout)
 	this.groupTimeout = setTimeout(() => {
-		this.log("hm: requestGroupStatus: push");
-		this.groupQueue.push(cb);
 		this.log("hm: requestGroupStatus: GET_GROUP_STATUS");
 		this.GET_GROUP_STATUS();
 	}, 200);
