@@ -155,8 +155,8 @@ AirtouchAPI.prototype.requestStatus = function() {
 AirtouchAPI.prototype.requestACStatus = function(cb) {
 	clearTimeout(this.acTimeout);
 	this.acTimeout = setTimeout(() => {
-		this.GET_AC_STATUS();
 		this.acQueue.push(cb);
+		this.GET_AC_STATUS();
 
 		// Retry
 		setTimeout(() => {
@@ -170,8 +170,8 @@ AirtouchAPI.prototype.requestACStatus = function(cb) {
 AirtouchAPI.prototype.requestGroupStatus = function(cb) {
 	clearTimeout(this.groupTimeout)
 	this.groupTimeout = setTimeout(() => {
-		this.GET_GROUP_STATUS();
 		this.groupQueue.push(cb);
+		this.GET_GROUP_STATUS();
 
 		// Retry
 		setTimeout(() => {
