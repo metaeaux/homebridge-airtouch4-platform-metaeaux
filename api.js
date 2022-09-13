@@ -155,29 +155,29 @@ AirtouchAPI.prototype.requestStatus = function() {
 };
 
 AirtouchAPI.prototype.requestACStatus = function(cb) {
-	this.log("hm: requestACStatus");
-	this.log("hm: requestACStatus: push");
 	const id = this.nextAcId;
+	this.log("hm: requestACStatus: " + id);
+	this.log("hm: requestACStatus: push " + id);
 	this.acQueue.push({cb, id});
 	clearTimeout(this.acTimeout);
 	this.acTimeout = setTimeout(() => {
 		this.log("hm: requestACStatus: push");
 		this.log("hm: requestACStatus: GET_AC_STATUS: " + id);
 		this.GET_AC_STATUS(id);
-		this.nextAcId = this.nextAcId++ % 128;
+		this.nextAcId = (id++) % 128;
 	}, 200);
 };
 
 AirtouchAPI.prototype.requestGroupStatus = function(cb) {
-	this.log("hm: requestGroupStatus");
-	this.log("hm: requestGroupStatus: push");
 	const id = this.nextGroupId;
+	this.log("hm: requestGroupStatus " + id);
+	this.log("hm: requestGroupStatus: push " + id);
 	this.groupQueue.push({cb, id});
 	clearTimeout(this.groupTimeout)
 	this.groupTimeout = setTimeout(() => {
 		this.log("hm: requestGroupStatus: GET_GROUP_STATUS: " + id);
 		this.GET_GROUP_STATUS(id);
-		this.nextGroupId = (this.nextGroupId++ % 128) + 128;
+		this.nextGroupId = ((id++) % 128) + 128;
 	}, 200);
 };
 
