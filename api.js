@@ -154,6 +154,9 @@ AirtouchAPI.prototype.requestStatus = function() {
 	}
 };
 
+const debounceTime = 250;
+const retryTime = 1000;
+
 AirtouchAPI.prototype.requestACStatus = function(cb) {
 	const id = this.nextAcId;
 	this.log("hm: requestACStatus: " + id);
@@ -165,7 +168,15 @@ AirtouchAPI.prototype.requestACStatus = function(cb) {
 		this.log("hm: requestACStatus: GET_AC_STATUS: " + id);
 		this.GET_AC_STATUS(id);
 		this.nextAcId = (id+1) % 128;
-	}, 200);
+
+		// retry in 1 second
+		setTimeout(() => {
+			if (this.acQueue.filter(v => v.id === id).length) {
+				this.log("hm: requestACStatus: RETRY !! GET_AC_STATUS: " + id);
+				this.GET_AC_STATUS(id);
+			}
+		}, retryTime);
+	}, debounceTime);
 };
 
 AirtouchAPI.prototype.requestGroupStatus = function(cb) {
@@ -178,7 +189,15 @@ AirtouchAPI.prototype.requestGroupStatus = function(cb) {
 		this.log("hm: requestGroupStatus: GET_GROUP_STATUS: " + id);
 		this.GET_GROUP_STATUS(id);
 		this.nextGroupId = ((id+1) % 128) + 128;
-	}, 200);
+
+		// retry in 1 second
+		setTimeout(() => {
+			if (this.groupQueue.filter(v => v.id === id).length) {
+				this.log("hm: requestGroupStatus: RETRY !! GET_GROUP_STATUS: " + id);
+				this.GET_GROUP_STATUS(id);
+			}
+		}, retryTime);
+	}, debounceTime);
 };
 
 // decode AC status information and send it to homebridge
