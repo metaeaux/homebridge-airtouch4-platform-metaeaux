@@ -208,13 +208,15 @@ AirtouchAPI.prototype.decode_ac_status = function(data, id) {
 		});
 	}
 	this.emit("ac_status", ac_status);
-	this.acQueue.forEach((cb) => {
+	for (let i = 0; i < this.acQueue.length; i++) {
+		const cb = this.acQueue[i];
 		if (cb.id === id) {
 			cb.cb && cb.cb();
 			this.log("hm: decode_ac_status: emit cb: " + id);
-			this.acQueue.splice(this.acQueue.indexOf(cb), 1);
+			this.acQueue[i] = undefined;
 		}
-	});
+	}
+	this.acQueue = this.acQueue.filter((v) => v !== undefined);
 };
 
 // encode a message for AC command
@@ -312,13 +314,15 @@ AirtouchAPI.prototype.decode_groups_status = function(data, id) {
 		});
 	}
 	this.emit("groups_status", groups_status);
-	this.groupQueue.forEach((cb) => {
+	for (let i = 0; i < this.groupQueue.length; i++) {
+		const cb = this.groupQueue[i];
 		if (cb.id === id) {
 			cb.cb && cb.cb();
 			this.log("hm: decode_groups_status: emit cb: " + id);
-			this.groupQueue.splice(this.groupQueue.indexOf(cb), 1);
+			this.groupQueue[i] = undefined;
 		}
-	});
+	}
+	this.groupQueue = this.groupQueue.filter((v) => v !== undefined);
 };
 
 // connect to Airtouch Touchpad Controller socket on tcp port 9004
