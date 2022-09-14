@@ -248,22 +248,22 @@ Airtouch.prototype.updateACAccessory = function(accessory, status) {
 	if (status.ac_power_state === 0) // OFF
 	{
 		accessory.context.currentHeatingCoolingState = 0;
-		mode = "Off";
+		mode = "OFF";
 	}
 	else if (status.ac_mode === 1) // HEAT
 	{
 		accessory.context.currentHeatingCoolingState = 1;
-		mode = "Heat";
+		mode = "HEAT";
 	}
 	else if (status.ac_mode === 4) // COOL
 	{
 		accessory.context.currentHeatingCoolingState = 2;
-		mode = "Cool";
+		mode = "COOL";
 	}
 	else // AUTO, for: 2=DRY, 3=FAN, 8=AUTO-HEAT, 9=AUTO-COOL
 	{
 		accessory.context.currentHeatingCoolingState = 3;
-		mode = "Auto";
+		mode = "AUTO";
 	}
 	thermostat.setCharacteristic(Characteristic.CurrentHeatingCoolingState, accessory.context.currentHeatingCoolingState);
 
@@ -454,7 +454,7 @@ Airtouch.prototype.updateZoneAccessory = function(accessory, status) {
 	}
 
 	accessory.updateReachability(true);
-	this.log(`[${accessory.displayName}] ${accessory.context.active ? 'On ' : 'Off'} ${accessory.context.currentTemperature}°C -> ${status.group_target}°C`);
+	this.log(`[${accessory.displayName}] ${accessory.context.active ? 'ON ' : 'OFF'} ${accessory.context.currentTemperature}°C -> ${status.group_target}°C`);
 };
 
 // setup Thermo accessory callbacks
