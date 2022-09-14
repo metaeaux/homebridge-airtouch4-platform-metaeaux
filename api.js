@@ -377,7 +377,7 @@ AirtouchAPI.prototype.connect = function(address) {
 		let datalen = this.device.read(2);
 		let data = this.device.read(datalen.readUInt16BE());
 		let crc = this.device.read(2);
-		this.log("API | Received message with id " + msgid + " and data " + data.toString("hex"));
+		// this.log("API | Received message with id " + msgid + " and data " + data.toString("hex"));
 		if (crc.readUInt16BE() != crc16([...header.slice(2), ...datalen, ...data])) {
 			this.log("API | ERROR: invalid crc");
 			return;
