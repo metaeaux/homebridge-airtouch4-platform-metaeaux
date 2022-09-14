@@ -246,14 +246,27 @@ Airtouch.prototype.setupACAccessory = function(accessory) {
 Airtouch.prototype.updateACAccessory = function(accessory, status) {
 	const thermostat = accessory.getService(Service.Thermostat);
 
+	let mode;
 	if (status.ac_power_state === 0) // OFF
+	{
 		accessory.context.currentHeatingCoolingState = 0;
+		mode = "Off";
+	}
 	else if (status.ac_mode === 1) // HEAT
+	{
 		accessory.context.currentHeatingCoolingState = 1;
+		mode = "Heat";
+	}
 	else if (status.ac_mode === 4) // COOL
+	{
 		accessory.context.currentHeatingCoolingState = 2;
+		mode = "Cool";
+	}
 	else // AUTO, for: 2=DRY, 3=FAN, 8=AUTO-HEAT, 9=AUTO-COOL
+	{
 		accessory.context.currentHeatingCoolingState = 3;
+		mode = "Auto";
+	}
 	thermostat.setCharacteristic(Characteristic.CurrentHeatingCoolingState, accessory.context.currentHeatingCoolingState);
 
 	accessory.context.targetHeatingCoolingState = accessory.context.currentHeatingCoolingState;
@@ -295,9 +308,7 @@ Airtouch.prototype.updateACAccessory = function(accessory, status) {
 	accessory.updateReachability(true);
 	// this.log("Finished updating accessory [" + accessory.displayName + "]");
 
-	const ac_mode = Object.keys(MAGIC.AC_MODES).find(key => MAGIC.AC_MODES[key] === status.ac_mode);
-
-	this.log(`[${accessory.displayName}]: ${ac_mode} ${fan_speed}`);
+	this.log(`[${accessory.displayName}]: ${mode} ${fan_speed}`);
 };
 
 // setup Zone accessory callbacks
