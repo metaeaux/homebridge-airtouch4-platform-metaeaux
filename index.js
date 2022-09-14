@@ -445,7 +445,7 @@ Airtouch.prototype.updateZoneAccessory = function(accessory, status) {
 	}
 
 	accessory.updateReachability(true);
-	this.log(`[${accessory.displayName}] ${accessory.context.active ? 'On' : 'Off'} ${accessory.context.currentTemperature}°C -> ${accessory.context.targetTemperature}°C`);
+	this.log(`[${accessory.displayName}] ${accessory.context.active ? 'On ' : 'Off'} ${accessory.context.currentTemperature}°C -> ${status.group_target}°C`);
 };
 
 // setup Thermo accessory callbacks
