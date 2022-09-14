@@ -75,8 +75,6 @@ function Airtouch(log, config, api) {
 
 // configure cached accessories
 Airtouch.prototype.configureAccessory = function(accessory) {
-	this.log("Configuring [" + accessory.displayName + "]");
-
 	if (accessory.displayName in this.units || accessory.displayName in this.zones) {
 		// this.log("[" + accessory.displayName + "] is already configured");
 		return;
