@@ -45,8 +45,8 @@ function isNull(val, nullVal) {
 // send message to the Airtouch Touchpad Controller
 AirtouchAPI.prototype.send = function(type, data, id) {
 	id = id || Math.floor(Math.random() * Math.floor(255)) + 1;
-	this.log("API | Sending message " + id + " with type " + type.toString(16) + " containing:");
-	this.log(data);
+	// this.log("API | Sending message " + id + " with type " + type.toString(16) + " containing:");
+	// this.log(data);
 	// generate a random message id
 	let msgid = Buffer.alloc(1);
 	msgid.writeUInt8(id);
@@ -60,8 +60,8 @@ AirtouchAPI.prototype.send = function(type, data, id) {
 	crc.writeUInt16BE(crc16(payload));
 	// assemble message
 	let message = Buffer.from([...MAGIC.HEADER_BYTES, ...payload,  ...crc]);
-	this.log("API | Message to send:");
-	this.log(message);
+	// this.log("API | Message to send:");
+	// this.log(message);
 	// send message
 	this.device.write(message);
 };
@@ -81,12 +81,14 @@ AirtouchAPI.prototype.encode_ac_control = function(unit) {
 // send command to change AC mode (OFF/HEATING/COOLING/AUTO)
 AirtouchAPI.prototype.acSetCurrentHeatingCoolingState = function(unit_number, state) {
 	let target;
+	let mode;
 	switch (state) {
 		case 0: // OFF
 			target = {
 				ac_unit_number: unit_number,
 				ac_power_state: MAGIC.AC_POWER_STATES.OFF,
 			};
+			mode = "Off";
 			break;
 		case 1: // HEAT
 			target = {
@@ -94,6 +96,7 @@ AirtouchAPI.prototype.acSetCurrentHeatingCoolingState = function(unit_number, st
 				ac_power_state: MAGIC.AC_POWER_STATES.ON,
 				ac_mode: MAGIC.AC_MODES.HEAT,
 			};
+			mode = "Heat";
 			break;
 		case 2: // COOL
 			target = {
@@ -101,6 +104,7 @@ AirtouchAPI.prototype.acSetCurrentHeatingCoolingState = function(unit_number, st
 				ac_power_state: MAGIC.AC_POWER_STATES.ON,
 				ac_mode: MAGIC.AC_MODES.COOL,
 			};
+			mode = "Cool"
 			break;
 		default: // everything else is AUTO
 			target = {
@@ -108,8 +112,10 @@ AirtouchAPI.prototype.acSetCurrentHeatingCoolingState = function(unit_number, st
 				ac_power_state: MAGIC.AC_POWER_STATES.ON,
 				ac_mode: MAGIC.AC_MODES.AUTO,
 			};
+			mode = "Auto";
+			break;
 	}
-	this.log("API | Setting AC heating/cooling state to: " + JSON.stringify(target));
+	this.log(`API | Setting AC${unit_number} to ${mode}`);
 	let data = this.encode_ac_control(target);
 	this.send(MAGIC.MSGTYPE_AC_CTRL, data);
 };
@@ -120,7 +126,7 @@ AirtouchAPI.prototype.acSetTargetTemperature = function(unit_number, temp) {
 		ac_unit_number: unit_number,
 		ac_target_value: temp,
 	};
-	this.log("API | Setting AC target temperature " + JSON.stringify(target));
+	this.log(`API | Setting AC${unit_number} target temp to ${temp}°C`);
 	let data = this.encode_ac_control(target);
 	this.send(MAGIC.MSGTYPE_AC_CTRL, data);
 };
@@ -131,7 +137,8 @@ AirtouchAPI.prototype.acSetFanSpeed = function(unit_number, speed) {
 		ac_unit_number: unit_number,
 		ac_fan_speed: speed,
 	};
-	this.log("API | Setting AC fan speed " + JSON.stringify(target));
+	const fan_speed = Object.keys(MAGIC.AC_FAN_SPEEDS).find(key => MAGIC.AC_FAN_SPEEDS[key] === status.ac_fan_speed);
+	this.log(`API | Setting AC${unit_number} fan to ${fan_speed}`);
 	let data = this.encode_ac_control(target);
 	this.send(MAGIC.MSGTYPE_AC_CTRL, data);
 };
@@ -159,20 +166,18 @@ const retryTime = 1000;
 
 AirtouchAPI.prototype.requestACStatus = function(cb) {
 	const id = this.nextAcId;
-	this.log("hm: requestACStatus: " + id);
-	this.log("hm: requestACStatus: push " + id);
+	// this.log("hm: requestACStatus: " + id);
 	this.acQueue.push({cb, id});
 	clearTimeout(this.acTimeout);
 	this.acTimeout = setTimeout(() => {
-		this.log("hm: requestACStatus: push");
-		this.log("hm: requestACStatus: GET_AC_STATUS: " + id);
+		// this.log("hm: requestACStatus: GET_AC_STATUS: " + id);
 		this.GET_AC_STATUS(id);
 		this.nextAcId = (id+1) % 128;
 
 		// retry in 1 second
 		setTimeout(() => {
 			if (this.acQueue.filter(v => v.id === id).length) {
-				this.log("hm: requestACStatus: RETRY !! GET_AC_STATUS: " + id);
+				// this.log("hm: requestACStatus: RETRY !! GET_AC_STATUS: " + id);
 				this.GET_AC_STATUS(id);
 			}
 		}, retryTime);
@@ -181,19 +186,18 @@ AirtouchAPI.prototype.requestACStatus = function(cb) {
 
 AirtouchAPI.prototype.requestGroupStatus = function(cb) {
 	const id = this.nextGroupId;
-	this.log("hm: requestGroupStatus " + id);
-	this.log("hm: requestGroupStatus: push " + id);
+	// this.log("hm: requestGroupStatus: " + id);
 	this.groupQueue.push({cb, id});
 	clearTimeout(this.groupTimeout)
 	this.groupTimeout = setTimeout(() => {
-		this.log("hm: requestGroupStatus: GET_GROUP_STATUS: " + id);
+		// this.log("hm: requestGroupStatus: GET_GROUP_STATUS: " + id);
 		this.GET_GROUP_STATUS(id);
 		this.nextGroupId = ((id+1) % 128) + 128;
 
 		// retry in 1 second
 		setTimeout(() => {
 			if (this.groupQueue.filter(v => v.id === id).length) {
-				this.log("hm: requestGroupStatus: RETRY !! GET_GROUP_STATUS: " + id);
+				// this.log("hm: requestGroupStatus: RETRY !! GET_GROUP_STATUS: " + id);
 				this.GET_GROUP_STATUS(id);
 			}
 		}, retryTime);
@@ -231,7 +235,7 @@ AirtouchAPI.prototype.decode_ac_status = function(data, id) {
 		const cb = this.acQueue[i];
 		if (cb.id <= id) {
 			cb.cb && cb.cb();
-			this.log("hm: decode_ac_status: emit cb: " + id);
+			// this.log("hm: decode_ac_status: emit cb: " + id);
 			this.acQueue[i] = undefined;
 		}
 	}
@@ -255,7 +259,7 @@ AirtouchAPI.prototype.zoneSetActive = function(group_number, active) {
 		group_number: group_number,
 		group_power_state: active ? MAGIC.GROUP_POWER_STATES.ON : MAGIC.GROUP_POWER_STATES.OFF,
 	};
-	this.log("API | Setting zone state: " + JSON.stringify(target));
+	this.log(`API | Setting Zone ${group_number} ${active ? 'On' : 'Off'}`);
 	let data = this.encode_group_control(target);
 	this.send(MAGIC.MSGTYPE_GRP_CTRL, data);
 };
@@ -267,7 +271,7 @@ AirtouchAPI.prototype.zoneSetDamperPosition = function(group_number, position) {
 		group_target_type: MAGIC.GROUP_TARGET_TYPES.DAMPER,
 		group_target: position,
 	};
-	this.log("API | Setting damper position: " + JSON.stringify(target));
+	this.log(`API | Setting Zone ${group_number} damper ${position}`);
 	let data = this.encode_group_control(target);
 	this.send(MAGIC.MSGTYPE_GRP_CTRL, data);
 };
@@ -278,7 +282,7 @@ AirtouchAPI.prototype.zoneSetControlType = function(group_number, type) {
 		group_number: group_number,
 		group_control_type: MAGIC.GROUP_CONTROL_TYPES.DAMPER + type,
 	};
-	this.log("API | Setting control type: " + JSON.stringify(target));
+	this.log(`API | Setting Zone ${group_number} control to ${type ? 'temperature' : 'damper'}`);
 	let data = this.encode_group_control(target);
 	this.send(MAGIC.MSGTYPE_GRP_CTRL, data);
 };
@@ -290,7 +294,7 @@ AirtouchAPI.prototype.zoneSetTargetTemperature = function(group_number, temp) {
 		group_target_type: MAGIC.GROUP_TARGET_TYPES.TEMPERATURE,
 		group_target: temp,
 	};
-	this.log("API | Setting target temperature: " + JSON.stringify(target));
+	this.log(`API | Setting Zone ${group_number} target temp to ${temp}°C`);
 	let data = this.encode_group_control(target);
 	this.send(MAGIC.MSGTYPE_GRP_CTRL, data);
 };
@@ -337,7 +341,7 @@ AirtouchAPI.prototype.decode_groups_status = function(data, id) {
 		const cb = this.groupQueue[i];
 		if (cb.id <= id) {
 			cb.cb && cb.cb();
-			this.log("hm: decode_groups_status: emit cb: " + id);
+			// this.log("hm: decode_groups_status: emit cb: " + id);
 			this.groupQueue[i] = undefined;
 		}
 	}

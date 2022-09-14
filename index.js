@@ -75,10 +75,10 @@ function Airtouch(log, config, api) {
 
 // configure cached accessories
 Airtouch.prototype.configureAccessory = function(accessory) {
-	this.log("Trying to configure [" + accessory.displayName + "] from cache...");
+	this.log("Configuring [" + accessory.displayName + "]");
 
 	if (accessory.displayName in this.units || accessory.displayName in this.zones) {
-		this.log("[" + accessory.displayName + "] is already configured");
+		// this.log("[" + accessory.displayName + "] is already configured");
 		return;
 	}
 
@@ -97,17 +97,17 @@ Airtouch.prototype.configureAccessory = function(accessory) {
 		this.zones[accessory.displayName] = accessory;
 	}
 
-	this.log("[" + accessory.displayName + "] was restored from cache and should be reachable");
+	// this.log("[" + accessory.displayName + "] was restored from cache and should be reachable");
 };
 
 // callback for AC messages received from Airtouch Touchpad Controller
 Airtouch.prototype.onACStatusNotification = function(ac_status) {
 	ac_status.forEach(unit_status => {
 		unit_name = "AC " + unit_status.ac_unit_number;
-		this.log("Received status update for [" + unit_name + "]: " + JSON.stringify(unit_status));
+		// this.log("Received status update for [" + unit_name + "]: " + JSON.stringify(unit_status));
 		// check if accessory exists
 		if (!(unit_name in this.units)) {
-			this.log("[" + unit_name + "] was not found, creating as new AC accessory...");
+			// this.log("[" + unit_name + "] was not found, creating as new AC accessory...");
 			let uuid = UUIDGen.generate(unit_name);
 			let unit = new Accessory(unit_name, uuid);
 			unit.log = this.log;
@@ -128,10 +128,10 @@ Airtouch.prototype.onACStatusNotification = function(ac_status) {
 Airtouch.prototype.onGroupsStatusNotification = function(groups_status) {
 	groups_status.forEach(zone_status => {
 		let zone_name = "Zone " + zone_status.group_number;
-		this.log("Received status update for [" + zone_name + "]: " + JSON.stringify(zone_status));
+		// this.log("Received status update for [" + zone_name + "]: " + JSON.stringify(zone_status));
 		// check if accessory exists
 		if (!(zone_name in this.zones)) {
-			this.log("[" + zone_name + "] was not found, creating as new Zone accessory...");
+			// this.log("[" + zone_name + "] was not found, creating as new Zone accessory...");
 			let uuid = UUIDGen.generate(zone_name);
 			let zone = new Accessory(zone_name, uuid);
 			zone.log = this.log;
@@ -239,18 +239,18 @@ Airtouch.prototype.setupACAccessory = function(accessory) {
 	accessory.historyService = new FakeGatoHistoryService("thermo", accessory, { storage: "fs" });
 	accessory.historyUpdate = 0;
 
-	this.log("Finished creating accessory [" + accessory.displayName + "]");
+	this.log("Created accessory [" + accessory.displayName + "]");
 };
 
 // update AC accessory data
 Airtouch.prototype.updateACAccessory = function(accessory, status) {
-	let thermostat = accessory.getService(Service.Thermostat);
+	const thermostat = accessory.getService(Service.Thermostat);
 
-	if (status.ac_power_state == 0) // OFF
+	if (status.ac_power_state === 0) // OFF
 		accessory.context.currentHeatingCoolingState = 0;
-	else if (status.ac_mode == 1) // HEAT
+	else if (status.ac_mode === 1) // HEAT
 		accessory.context.currentHeatingCoolingState = 1;
-	else if (status.ac_mode == 4) // COOL
+	else if (status.ac_mode === 4) // COOL
 		accessory.context.currentHeatingCoolingState = 2;
 	else // AUTO, for: 2=DRY, 3=FAN, 8=AUTO-HEAT, 9=AUTO-COOL
 		accessory.context.currentHeatingCoolingState = 3;
@@ -266,13 +266,13 @@ Airtouch.prototype.updateACAccessory = function(accessory, status) {
 	thermostat.setCharacteristic(Characteristic.TargetTemperature, accessory.context.targetTemperature);
 
 	// convert AC fan speed number in AC fan speed string (e.g. 4 => High)
-	let fan_speed = Object.keys(MAGIC.AC_FAN_SPEEDS).find(key => MAGIC.AC_FAN_SPEEDS[key] === status.ac_fan_speed);
+	const fan_speed = Object.keys(MAGIC.AC_FAN_SPEEDS).find(key => MAGIC.AC_FAN_SPEEDS[key] === status.ac_fan_speed);
 	// convert AC fan speed string into homebridge fan rotation % (e.g. High => 99%) using the config array
 	accessory.context.rotationSpeed = accessory.context.fan_speeds.indexOf(fan_speed) * accessory.context.rotation_step;
 	thermostat.setCharacteristic(Characteristic.RotationSpeed, accessory.context.rotationSpeed);
 
 	// save history as Eve Thermo
-	let now = new Date().getTime() / 1000;
+	const now = new Date().getTime() / 1000;
 	if (now - accessory.historyUpdate > 285) { // 285s = 4.75 min update intervals
 		accessory.historyService.addEntry({
 			time: now,
@@ -293,7 +293,11 @@ Airtouch.prototype.updateACAccessory = function(accessory, status) {
 	thermostat.setCharacteristic(CustomCharacteristic.TimerStatus, accessory.context.timerStatus);
 
 	accessory.updateReachability(true);
-	this.log("Finished updating accessory [" + accessory.displayName + "]");
+	// this.log("Finished updating accessory [" + accessory.displayName + "]");
+
+	const ac_mode = Object.keys(MAGIC.AC_MODES).find(key => MAGIC.AC_MODES[key] === status.ac_mode);
+
+	this.log(`[${accessory.displayName}]: ${ac_mode} ${fan_speed}`);
 };
 
 // setup Zone accessory callbacks
@@ -369,7 +373,7 @@ Airtouch.prototype.setupZoneAccessory = function(accessory) {
 
 	accessory.historyService = new FakeGatoHistoryService("room", accessory, { storage: "fs" });
 
-	this.log("Finished creating accessory [" + accessory.displayName + "]");
+	this.log("Created accessory [" + accessory.displayName + "]");
 };
 
 // update Zone accessory data
@@ -410,10 +414,10 @@ Airtouch.prototype.updateZoneAccessory = function(accessory, status) {
 
 		// update thermostat accessory
 		let thermo_name = accessory.displayName + " Thermostat";
-		this.log("Updating [" + thermo_name + "]");
+		// this.log("Updating [" + thermo_name + "]");
 		// check if accessory exists
 		if (!(thermo_name in this.thermostats)) {
-			this.log("[" + thermo_name + "] was not found, creating as new Thermostat accessory...");
+			// this.log("[" + thermo_name + "] was not found, creating as new Thermostat accessory...");
 			let uuid = UUIDGen.generate(thermo_name);
 			let thermo = new Accessory(thermo_name, uuid);
 			thermo.log = this.log;
@@ -431,7 +435,7 @@ Airtouch.prototype.updateZoneAccessory = function(accessory, status) {
 		// show temperature in the AC accessory
 		let ac = Object.entries(this.units)[0][1]; // get "AC 0"
 		let ac_sensor = ac.getService(accessory.displayName); // get sensor "Zone <N>" from ac
-		if (this.config["ac_include_temps"] == true) {
+		if (this.config["ac_include_temps"] === true) {
 			if (ac_sensor === undefined)
 				ac.addService(Service.TemperatureSensor, accessory.displayName, accessory.displayName);
 			ac_sensor.setCharacteristic(Characteristic.CurrentTemperature, accessory.context.currentTemperature);
@@ -441,7 +445,7 @@ Airtouch.prototype.updateZoneAccessory = function(accessory, status) {
 	}
 
 	accessory.updateReachability(true);
-	this.log("Finished updating accessory [" + accessory.displayName + "]");
+	this.log(`[${accessory.displayName}] ${accessory.context.active ? 'On' : 'Off'} ${accessory.context.currentTemperature}°C -> ${accessory.context.targetTemperature}°C`);
 };
 
 // setup Thermo accessory callbacks
@@ -501,7 +505,7 @@ Airtouch.prototype.setupThermoAccessory = function(accessory) {
 
 	//accessory.historyService = new FakeGatoHistoryService("room", accessory, { storage: "fs" });
 
-	this.log("Finished creating accessory [" + accessory.displayName + "]");
+	this.log("Created accessory [" + accessory.displayName + "]");
 };
 
 // update Thermo accessory data
@@ -528,7 +532,7 @@ Airtouch.prototype.updateThermoAccessory = function(accessory, status) {
 	//});
 
 	accessory.updateReachability(true);
-	this.log("Finished updating accessory [" + accessory.displayName + "]");
+	// this.log("Finished updating accessory [" + accessory.displayName + "]");
 };
 
 
